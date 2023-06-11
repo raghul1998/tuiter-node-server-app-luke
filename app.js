@@ -6,23 +6,28 @@ import cors from 'cors';
 import session from "express-session";
 import AuthController from "./users/auth-controller.js";
 import MemoryStore from "memorystore"
+import FileStore from "session-file-store"
 
 const memoryStore = MemoryStore(session);
+const filestr = FileStore(session);
 
 const app = express()
 app.use(
     session({
-        secret: "any string",
-        resave: false,
-        saveUninitialized: true,
-        store: new memoryStore({ checkPeriod: 86400000 }),
-    })
+                secret: "any string",
+                resave: false,
+                saveUninitialized: true,
+                store: new filestr({
+                                       path: './',
+                                       ttl: 86400,
+                                   })
+            })
 );
 app.use(
     cors({
-        credentials: true,
-        origin: "http://localhost:3000",
-    })
+             credentials: true,
+             origin: "http://localhost:3000",
+         })
 );
 app.use(express.json());
 const port = process.env.PORT || 4000;
