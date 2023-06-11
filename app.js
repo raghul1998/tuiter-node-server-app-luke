@@ -5,29 +5,36 @@ import TuitsController from "./controllers/tuits/tuits-controller.js";
 import cors from 'cors';
 import session from "express-session";
 import AuthController from "./users/auth-controller.js";
-import MemoryStore from "memorystore"
-import FileStore from "session-file-store"
-
-const memoryStore = MemoryStore(session);
-const filestr = FileStore(session);
+import { createClient } from 'redis';
+import RedisStore from "connect-redis"
 
 const app = express()
+
+const redisClient = createClient({
+                                password: 'UrjMydFDdvD6XylFGieel20zzgxv0up2',
+                                socket: {
+                                    host: 'redis-18855.c283.us-east-1-4.ec2.cloud.redislabs.com',
+                                    port: 18855
+                                }
+                            });
+// redisClient.connect().catch(console.error)
+
+const redisStore = new RedisStore({ client: redisClient });
+
+
 app.use(
     session({
-                secret: "any string",
-                resave: false,
-                saveUninitialized: true,
-                store: new filestr({
-                                       path: './',
-                                       ttl: 86400,
-                                   })
-            })
+        secret: "any string",
+        resave: false,
+        saveUninitialized: true,
+        store: redisStore,
+    })
 );
 app.use(
     cors({
-             credentials: true,
-             origin: "http://localhost:3000",
-         })
+        credentials: true,
+        origin: "http://localhost:3000",
+    })
 );
 app.use(express.json());
 const port = process.env.PORT || 4000;
