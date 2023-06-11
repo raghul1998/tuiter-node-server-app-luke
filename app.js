@@ -5,6 +5,9 @@ import TuitsController from "./controllers/tuits/tuits-controller.js";
 import cors from 'cors';
 import session from "express-session";
 import AuthController from "./users/auth-controller.js";
+import MemoryStore from "memorystore"
+
+const memoryStore = MemoryStore(session);
 
 const app = express()
 app.use(
@@ -12,6 +15,7 @@ app.use(
         secret: "any string",
         resave: false,
         saveUninitialized: true,
+        store: new memoryStore({ checkPeriod: 86400000 }),
     })
 );
 app.use(
